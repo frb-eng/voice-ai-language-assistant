@@ -1,7 +1,5 @@
 # Quassle
 
-Voice AI Assistant for Learning German Across Multiple Levels
-
 The Voice AI Assistant is an interactive tool designed to enhance German language learning by providing tailored experiences for users at different skill levels.
 
 ## Key Features
