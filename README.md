@@ -56,7 +56,7 @@ This assistant is designed to create an engaging, adaptive, and supportive envir
 
 ## User flow
 
-![alt text](docs/flow.png)
+![alt text](docs/user_flow.png)
 
 ## Architecture
 
