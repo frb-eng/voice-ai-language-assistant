@@ -1,4 +1,6 @@
-# Voice AI Assistant for Learning German Across Multiple Levels
+# Quassle
+
+Voice AI Assistant for Learning German Across Multiple Levels
 
 The Voice AI Assistant is an interactive tool designed to enhance German language learning by providing tailored experiences for users at different skill levels.
 
@@ -36,3 +38,28 @@ The Voice AI Assistant is an interactive tool designed to enhance German languag
 ---
 
 This assistant is designed to create an engaging, adaptive, and supportive environment for learning German, ensuring that learners can practice and improve their skills effectively.
+
+## Post MVP ideas
+
+- level assesment
+- options
+  - time box
+  - number of iterations
+  - interaction mode
+    - correction after every sentence
+    - summary at the end
+- languages
+
+## Language levels
+
+- Beginner
+- Intermidiate
+- Andvanced
+
+## User flow
+
+![alt text](docs/flow.png)
+
+## Architecture
+
+![alt text](docs/architecture.png)
