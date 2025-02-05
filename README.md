@@ -47,7 +47,7 @@ This assistant is designed to create an engaging, adaptive, and supportive envir
     - correction after every sentence
     - summary at the end
 - languages
-- "repeat the question functionality (btn)"
+- repeat the question from AI (click button to listen again)
 
 ## Language levels
 
