@@ -47,6 +47,7 @@ This assistant is designed to create an engaging, adaptive, and supportive envir
     - correction after every sentence
     - summary at the end
 - languages
+- "repeat the question functionality (btn)"
 
 ## Language levels
 
