@@ -55,6 +55,10 @@ This assistant is designed to create an engaging, adaptive, and supportive envir
 - Intermidiate
 - Andvanced
 
+## UI
+
+![alt text](docs/ui.png)
+
 ## User flow
 
 ![alt text](docs/user_flow.png)
