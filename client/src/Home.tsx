@@ -10,7 +10,7 @@ export const Home = ({ textPromise }: HomeProps) => {
   return (
     <div>
       <LanguageLevelSelector />
-      <h1>{text}</h1>
+      {/* <h1>{text}</h1> */}
     </div>
   );
 };
