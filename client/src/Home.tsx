@@ -1,5 +1,6 @@
 import { use } from "react";
-import { LanguageLevelSelector } from "./LanguageLevelSelector"; // Import the selector
+import { LanguageLevelSelector } from "./LanguageLevelSelector";
+import PageLayout from "./components/PageLayout"; // Import the PageLayout component
 
 export interface HomeProps {
   textPromise: Promise<string>;
@@ -8,9 +9,9 @@ export interface HomeProps {
 export const Home = ({ textPromise }: HomeProps) => {
   const text = use(textPromise);
   return (
-    <div>
+    <PageLayout>
       <LanguageLevelSelector />
       {/* <h1>{text}</h1> */}
-    </div>
+    </PageLayout>
   );
 };
