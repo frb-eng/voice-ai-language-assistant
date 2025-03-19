@@ -17,3 +17,7 @@
   background-color: #007bff;
   color: #fff;
 }
+
+.container.fullWidth {
+  width: 100%;
+}
