@@ -6,12 +6,13 @@ interface ButtonProps extends React.PropsWithChildren {
   onClick: () => void;
   isActive: boolean;
   fullWidth?: boolean;
+  className?: string; // New prop
 }
 
-const Button: React.FC<ButtonProps> = ({ onClick, isActive, fullWidth, children }) => {
+const Button: React.FC<ButtonProps> = ({ onClick, isActive, fullWidth, className, children }) => {
   return (
     <button
-      className={classNames(styles.container, { [styles.active]: isActive, [styles.fullWidth]: fullWidth })}
+      className={classNames(styles.container, className, { [styles.active]: isActive, [styles.fullWidth]: fullWidth })}
       onClick={onClick}
     >
       {children}
