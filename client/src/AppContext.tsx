@@ -33,6 +33,7 @@ interface AppContext {
   level?: LanguageLevel;
   setLevel: (level: LanguageLevel) => void;
   topics: string[];
+  loading: boolean; // Add loading state
   selectedTopic?: string;
   setSelectedTopic: (topic: string) => void;
 }
@@ -43,19 +44,21 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
   const [level, setLevel] = useState<LanguageLevel>();
   const [topics, setTopics] = useState<string[]>([]);
   const [selectedTopic, setSelectedTopic] = useState<string>();
+  const [loading, setLoading] = useState(false); // Add loading state
 
   useEffect(() => {
     if (level) {
-      // Fetch topics based on the selected level
+      setLoading(true); // Set loading to true before fetching
       fetch(`/api/topics?level=${level}`)
         .then(response => response.json())
         .then(data => setTopics(data.topics))
-        .catch(error => console.error("Error fetching topics:", error));
+        .catch(error => console.error("Error fetching topics:", error))
+        .finally(() => setLoading(false)); // Set loading to false after fetching
     }
   }, [level]);
 
   return (
-    <AppContext.Provider value={{ level, setLevel, topics, selectedTopic, setSelectedTopic }}>
+    <AppContext.Provider value={{ level, setLevel, topics, loading, selectedTopic, setSelectedTopic }}>
       {children}
     </AppContext.Provider>
   );
