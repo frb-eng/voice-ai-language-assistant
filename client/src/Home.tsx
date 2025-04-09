@@ -1,28 +1,23 @@
-import { use } from "react";
+import { useAppContext } from "./AppContext";
 import { LanguageLevelSelector } from "./LanguageLevelSelector";
-import PageLayout from "./components/PageLayout"; // Import the PageLayout component
-import { useAppContext } from "./AppContext"; // Import useAppContext
-import { TopicsList } from "./TopicsList"; // Import TopicsList component
-import { Header } from "./components/Header"; // Import Header component
-import { LoadingSkeleton } from "./components/LoadingSkeleton"; // Update import
+import { TopicsList } from "./TopicsList";
+import { Header } from "./components/Header";
+import PageLayout from "./components/PageLayout";
 
 export interface HomeProps {
   textPromise: Promise<string>;
 }
 
-export const Home = ({ textPromise }: HomeProps) => {
-  const text = use(textPromise);
-  const { level, topics, loading } = useAppContext(); // Get level, topics, and loading state from context
+export const Home = () => {
+  const { level, topics } = useAppContext();
 
   return (
-    <>      
-    <Header /> {/* Add Header component */}
-    <PageLayout>
-      {!level && <LanguageLevelSelector />}
-      {level && loading && <LoadingSkeleton />} {/* Show loading skeleton while fetching */}
-      {level && !loading && <TopicsList topics={topics} />}
-      {/* <h1>{text}</h1> */}
-    </PageLayout>
+    <>
+      <Header />
+      <PageLayout>
+        {!level && <LanguageLevelSelector />}
+        {level && <TopicsList topics={topics} />}
+      </PageLayout>
     </>
   );
 };

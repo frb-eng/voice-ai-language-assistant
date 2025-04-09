@@ -1,4 +1,3 @@
-import React from "react";
 import { useAppContext } from "../AppContext"; // Import useAppContext
 import styles from "./Header.module.css"; // Import CSS module
 
@@ -9,24 +8,16 @@ export const Header = () => {
     <header className={styles.header}>
       <div className={styles.logoContainer}>
         <svg
-          className={styles.logo}
+          width="60"
+          height="60"
+          viewBox="0 0 60 60"
           xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 100 100"
-          role="img"
-          aria-label="Quassle Logo"
+          fill="none"
         >
-          <circle cx="50" cy="50" r="45" fill="#4CAF50" />
-          <text
-            x="50"
-            y="55"
-            textAnchor="middle"
-            fontSize="20"
-            fill="#ffffff"
-            fontFamily="Arial, sans-serif"
-          >
-            QA
-          </text>
+          <circle cx="30" cy="30" r="10" fill="#00D1B2" />
+          <circle cx="30" cy="30" r="5" fill="#1E1E2F" />
         </svg>
+
         <span className={styles.appName}>Quassle</span>
       </div>
       <div className={styles.tags}>

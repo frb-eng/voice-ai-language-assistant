@@ -1,17 +1,12 @@
-.skeletonContainer {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding: 10px;
-}
-
-.skeletonItem {
+.container {
   width: 100%;
-  height: 20px;
+  height: 46px;
   background: linear-gradient(90deg, #d6d6d6 25%, #ffffff 50%, #d6d6d6 75%);
   background-size: 200% 100%;
   animation: shimmer 1s infinite;
   border-radius: 4px;
+  opacity: .5;
+  margin: 5px;
 }
 
 @keyframes shimmer {
