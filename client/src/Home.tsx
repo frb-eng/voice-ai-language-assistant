@@ -1,4 +1,5 @@
 import { useAppContext } from "./AppContext";
+import { ChatWindow } from "./ChatWindow";
 import { LanguageLevelSelector } from "./LanguageLevelSelector";
 import { TopicsList } from "./TopicsList";
 import { Header } from "./components/Header";
@@ -9,14 +10,15 @@ export interface HomeProps {
 }
 
 export const Home = () => {
-  const { level, topics } = useAppContext();
+  const { level, topics, selectedTopic } = useAppContext();
 
   return (
     <>
       <Header />
       <PageLayout>
         {!level && <LanguageLevelSelector />}
-        {level && <TopicsList topics={topics} />}
+        {level && !selectedTopic && <TopicsList topics={topics} />}
+        {level && selectedTopic && <ChatWindow/>}
       </PageLayout>
     </>
   );

@@ -4,7 +4,7 @@ import styles from "./Button.module.css";
 
 interface ButtonProps extends React.PropsWithChildren {
   onClick: () => void;
-  isActive: boolean;
+  isActive?: boolean;
   fullWidth?: boolean;
   className?: string; // New prop
 }

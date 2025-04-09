@@ -41,10 +41,10 @@ interface AppContext {
 export const AppContext = createContext<AppContext | undefined>(undefined);
 
 export const AppContextProvider = ({ children }: { children: ReactNode }) => {
-  const [level, setLevel] = useState<LanguageLevel>("A1");
+  const [level, setLevel] = useState<LanguageLevel>();
   const [topics, setTopics] = useState<string[]>([]);
   const [selectedTopic, setSelectedTopic] = useState<string>();
-  const [loading, setLoading] = useState(true); // Add loading state
+  const [loading, setLoading] = useState(false); // Add loading state
 
   useEffect(() => {
     if (level) {

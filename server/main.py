@@ -46,3 +46,27 @@ async def get_topics(level: str = Query(..., regex="^(A1|A2|B1|B2|C1|C2)$")):
     )
     topics = response.choices[0].message.parsed
     return topics
+
+@app.get("/api/chat")
+async def get_conversation(level: str = Query(..., regex="^(A1|A2|B1|B2|C1|C2)$"),topic: str = Query(...)):
+    prompt = f"Initiate a conversation for {topic} for a {level} german language learner."
+    response = client.chat.completions.create(
+    messages=[
+        {
+          "role": "system",
+        "content": """
+        You are a German teacher and helpful assistant.
+        You will receive the selected topic and user language level
+        Please reply with a conversation starting single question.
+        """  
+        },
+        {
+            "role": "user",
+            "content": prompt
+        }
+    ],
+    model="gpt-4o",
+    temperature=0.1,
+    )
+    topics = response.choices[0].message.content
+    return topics
