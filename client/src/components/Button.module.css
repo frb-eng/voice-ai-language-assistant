@@ -21,3 +21,9 @@
 .container.fullWidth {
   width: 100%;
 }
+
+.container.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
+}

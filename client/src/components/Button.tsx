@@ -6,14 +6,31 @@ interface ButtonProps extends React.PropsWithChildren {
   onClick: () => void;
   isActive?: boolean;
   fullWidth?: boolean;
-  className?: string; // New prop
+  className?: string;
+  disabled?: boolean; // Added disabled prop
 }
 
-const Button: React.FC<ButtonProps> = ({ onClick, isActive, fullWidth, className, children }) => {
+const Button: React.FC<ButtonProps> = ({ 
+  onClick, 
+  isActive, 
+  fullWidth, 
+  className, 
+  disabled = false, // Default to false
+  children 
+}) => {
   return (
     <button
-      className={classNames(styles.container, className, { [styles.active]: isActive, [styles.fullWidth]: fullWidth })}
+      className={classNames(
+        styles.container, 
+        className, 
+        { 
+          [styles.active]: isActive, 
+          [styles.fullWidth]: fullWidth,
+          [styles.disabled]: disabled // Add disabled class when button is disabled
+        }
+      )}
       onClick={onClick}
+      disabled={disabled} // Add disabled attribute
     >
       {children}
     </button>
