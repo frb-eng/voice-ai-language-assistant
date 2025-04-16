@@ -1,12 +1,15 @@
-import { useAppContext } from "../AppContext"; // Import useAppContext
-import styles from "./Header.module.css"; // Import CSS module
+import { Link, useParams } from "react-router-dom"; 
+import styles from "./Header.module.css";
 
 export const Header = () => {
-  const { level, selectedTopic } = useAppContext(); // Get level and selectedTopic from context
+  const { level, topic } = useParams<{ level?: string; topic?: string }>();
 
   return (
     <header className={styles.header}>
-      <div className={styles.logoContainer}>
+      <Link 
+        to="/"
+        className={styles.logoContainer}
+      >
         <svg
           width="60"
           height="60"
@@ -19,10 +22,24 @@ export const Header = () => {
         </svg>
 
         <span className={styles.appName}>Quassle</span>
-      </div>
+      </Link>
       <div className={styles.tags}>
-        {level && <span className={styles.tag}>{level}</span>}
-        {selectedTopic && <span className={styles.tag}>{selectedTopic}</span>}
+        {level && (
+          <Link 
+            to="/level"
+            className={styles.tag}
+          >
+            {level}
+          </Link>
+        )}
+        {topic && level && (
+          <Link 
+            to={`/level/${level}/topic`}
+            className={styles.tag}
+          >
+            {topic}
+          </Link>
+        )}
       </div>
     </header>
   );
