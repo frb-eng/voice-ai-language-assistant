@@ -7,6 +7,15 @@ from pydantic import BaseModel
 class Topics(BaseModel):
     topics: list[str]
 
+class ChatMessage(BaseModel):
+    message: str
+    role: str
+
+class ChatRequest(BaseModel):
+    level: str
+    topic: str
+    history: list[ChatMessage] = []
+
 client = OpenAI(
     # This is the default and can be omitted
     api_key=os.environ.get("OPEN_API_TOKEN"),
@@ -70,3 +79,33 @@ async def get_conversation(level: str = Query(..., regex="^(A1|A2|B1|B2|C1|C2)$"
     )
     topics = response.choices[0].message.content
     return topics
+
+@app.post("/api/chat/continue")
+async def continue_conversation(chat_request: ChatRequest):
+    # Convert the chat history to the format expected by OpenAI API
+    messages = [
+        {
+            "role": "system",
+            "content": f"""
+            You are a German teacher and helpful assistant.
+            You are having a conversation with a {chat_request.level} level German language learner about '{chat_request.topic}'.
+            Respond in a way that's appropriate for their level. Include some German phrases or words.
+            Keep responses concise, clear, and encouraging.
+            """
+        }
+    ]
+    
+    # Add conversation history
+    for message in chat_request.history:
+        messages.append({
+            "role": message.role,
+            "content": message.message
+        })
+    
+    response = client.chat.completions.create(
+        messages=messages,
+        model="gpt-4o",
+        temperature=0.7,
+    )
+    
+    return {"message": response.choices[0].message.content, "role": "assistant"}
