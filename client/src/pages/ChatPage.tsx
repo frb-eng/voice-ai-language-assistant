@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import styles from "./ChatPage.module.css";
 import Button from "../components/Button";
 import AudioRecorder from "../components/AudioRecorder";
+import TextToSpeech from "../components/TextToSpeech";
 import { Header } from "../components/Header";
 import { LoadingSkeleton } from "../components/LoadingSkeleton";
 import PageLayout from "../components/PageLayout";
@@ -146,8 +147,15 @@ export const ChatPage = () => {
                     : styles.aiMessage
                 }`}
               >
-                <strong>{message.role === "user" ? "You" : "AI"}: </strong>
-                {message.message}
+                <div className={styles.messageContent}>
+                  <strong>{message.role === "user" ? "You" : "AI"}: </strong>
+                  {message.message}
+                </div>
+                {message.role === "assistant" && (
+                  <div className={styles.messageActions}>
+                    <TextToSpeech text={message.message} />
+                  </div>
+                )}
               </div>
             ))
           )}

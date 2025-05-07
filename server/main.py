@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Query, File, UploadFile
+from fastapi import FastAPI, Query, File, UploadFile, Response
 from openai import OpenAI
 import os
 from io import BytesIO
@@ -18,6 +18,10 @@ class ChatRequest(BaseModel):
     level: str
     topic: str
     history: list[ChatMessage] = []
+
+class TextToSpeechRequest(BaseModel):
+    text: str
+    voice: str = "alloy"  # Default voice
 
 client = OpenAI(
     # This is the default and can be omitted
@@ -137,3 +141,24 @@ async def speech_input(audio: UploadFile = File(...)):
     return {
         "text": response.text
     }
+
+@app.post("/api/text-to-speech")
+async def text_to_speech(request: TextToSpeechRequest):
+    try:
+        response = client.audio.speech.create(
+            model="tts-1",
+            voice=request.voice,
+            input=request.text
+        )
+        
+        # Get audio data as bytes
+        audio_data = response.content
+        
+        # Return the audio as a response with appropriate headers
+        return Response(
+            content=audio_data,
+            media_type="audio/mpeg"
+        )
+    except Exception as e:
+        print(f"Error generating speech: {e}")
+        return {"error": str(e)}
