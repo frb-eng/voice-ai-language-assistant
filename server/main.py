@@ -1,6 +1,9 @@
-from fastapi import FastAPI, Response, Query
+from fastapi import FastAPI, Query, File, UploadFile
 from openai import OpenAI
 import os
+from io import BytesIO
+from tempfile import NamedTemporaryFile
+from fastapi.middleware.cors import CORSMiddleware
 
 from pydantic import BaseModel
 
@@ -22,6 +25,15 @@ client = OpenAI(
 )
 
 app = FastAPI()
+
+# Add CORS middleware to allow requests from the client
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allow all origins in development
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.get("/api/topics")
 async def get_topics(level: str = Query(..., regex="^(A1|A2|B1|B2|C1|C2)$")):
@@ -109,3 +121,19 @@ async def continue_conversation(chat_request: ChatRequest):
     )
     
     return {"message": response.choices[0].message.content, "role": "assistant"}
+
+@app.post("/api/speech-to-text")
+async def speech_input(audio: UploadFile = File(...)):
+    audio_content = await audio.read()
+    
+    # Process the audio as before
+    buffer = BytesIO(audio_content)
+    buffer.name = audio.filename
+    response = client.audio.transcriptions.create(
+        model="whisper-1",
+        file=buffer
+    )
+    
+    return {
+        "text": response.text
+    }

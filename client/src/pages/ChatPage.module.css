@@ -84,6 +84,7 @@
   gap: 0.8rem;
   margin: 0.5rem auto;
   max-width: 800px;
+  align-items: center;
 }
 
 .inputBox {
@@ -134,5 +135,6 @@
 
   .inputSection {
     margin: 0.5rem 0.5rem;
+    flex-wrap: nowrap;
   }
 }

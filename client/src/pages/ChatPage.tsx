@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
 import styles from "./ChatPage.module.css";
 import Button from "../components/Button";
+import AudioRecorder from "../components/AudioRecorder";
 import { Header } from "../components/Header";
 import { LoadingSkeleton } from "../components/LoadingSkeleton";
 import PageLayout from "../components/PageLayout";
@@ -53,21 +54,20 @@ export const ChatPage = () => {
     }
   }, [levelParam, topicParam, chatHistory.length]);
 
-  const handleSendMessage = () => {
-    if (userInput.trim() && levelParam && topicParam) {
-      const userMessage = userInput.trim();
+  const handleSendMessage = (message: string = userInput.trim()) => {
+    if (message && levelParam && topicParam) {
       // Add user message to chat history
       setChatHistory((prev) => [
         ...prev,
-        { role: "user", message: userMessage },
+        { role: "user", message: message },
       ]);
-      setUserInput("");
+      setUserInput(""); // Clear the input field
       setIsProcessing(true);
 
       // Prepare the updated chat history for the API call
       const updatedHistory = [
         ...chatHistory,
-        { role: "user", message: userMessage }
+        { role: "user", message: message }
       ];
 
       // Send the message to the API to continue the conversation
@@ -106,6 +106,23 @@ export const ChatPage = () => {
         .finally(() => {
           setIsProcessing(false);
         });
+    }
+  };
+
+  // Handle speech input from the audio recorder
+  const handleTranscriptionResult = (transcript: string) => {
+    if (transcript) {
+      setUserInput(transcript); // Set the transcript to the input field
+      // Send the message with a small delay to allow users to see what was transcribed
+      setTimeout(() => {
+        handleSendMessage(transcript);
+      }, 500);
+    }
+  };
+
+  const handleButtonClick = () => {
+    if (userInput.trim()) {
+      handleSendMessage();
     }
   };
 
@@ -150,17 +167,21 @@ export const ChatPage = () => {
             className={styles.inputBox}
             disabled={isLoading || isProcessing}
             onKeyDown={(e) => {
-              if (e.key === "Enter" && !isLoading && !isProcessing) {
-                handleSendMessage();
+              if (e.key === "Enter" && !isLoading && !isProcessing && userInput.trim()) {
+                handleButtonClick();
               }
             }}
           />
           <Button
-            onClick={handleSendMessage}
+            onClick={handleButtonClick}
             disabled={isLoading || isProcessing || !userInput.trim()}
           >
             Send
           </Button>
+          <AudioRecorder 
+            onTranscriptionResult={handleTranscriptionResult}
+            disabled={isLoading || isProcessing}
+          />
         </div>
       </PageLayout>
     </>
