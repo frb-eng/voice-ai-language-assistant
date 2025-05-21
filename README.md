@@ -39,7 +39,7 @@ This assistant is designed to create an engaging, adaptive, and supportive envir
 
 ## Post MVP ideas
 
-- level assessment
+- level assesment
 - options
   - time box
   - number of iterations
@@ -52,8 +52,8 @@ This assistant is designed to create an engaging, adaptive, and supportive envir
 ## Language levels
 
 - Beginner
-- Intermediate
-- Advanced
+- Intermidiate
+- Andvanced
 
 ## UI
 
