@@ -66,7 +66,7 @@ async def get_topics(level: str = Query(..., regex="^(A1|A2|B1|B2|C1|C2)$")):
         }
     ],
     model="gpt-4o",
-    temperature=0.1,
+    temperature=1.3,
     response_format=Topics
     )
     topics = response.choices[0].message.parsed
@@ -91,7 +91,7 @@ async def get_conversation(level: str = Query(..., regex="^(A1|A2|B1|B2|C1|C2)$"
         }
     ],
     model="gpt-4o",
-    temperature=0.1,
+    temperature=1.3,
     )
     topics = response.choices[0].message.content
     return topics

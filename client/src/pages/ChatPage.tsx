@@ -24,6 +24,7 @@ export const ChatPage = () => {
   const [userInput, setUserInput] = useState("");
   const [chatHistory, setChatHistory] = useState<Message[]>([]);
   const chatHistoryRef = useRef<HTMLDivElement>(null);
+  const [conversationStarted, setConversationStarted] = useState(false);
 
   // Auto-scroll to the bottom when new messages arrive
   useEffect(() => {
@@ -32,9 +33,9 @@ export const ChatPage = () => {
     }
   }, [chatHistory]);
 
-  // Initialize chat with an AI prompt
+  // Initialize chat with an AI prompt when conversation is started
   useEffect(() => {
-    if (levelParam && topicParam && chatHistory.length === 0) {
+    if (levelParam && topicParam && conversationStarted && chatHistory.length === 0) {
       setIsLoading(true);
       // Fetch initial prompt from API using URL parameters
       fetch(
@@ -53,7 +54,7 @@ export const ChatPage = () => {
           setIsLoading(false);
         });
     }
-  }, [levelParam, topicParam, chatHistory.length]);
+  }, [levelParam, topicParam, conversationStarted, chatHistory.length]);
 
   const handleSendMessage = (message: string = userInput.trim()) => {
     if (message && levelParam && topicParam) {
@@ -127,70 +128,84 @@ export const ChatPage = () => {
     }
   };
 
+  const startConversation = () => {
+    setConversationStarted(true);
+  };
+
   return (
     <>
       <Header />
       <PageLayout>
-        <div className={styles.chatHistory} ref={chatHistoryRef}>
-          {isLoading ? (
-            <div className={styles.loadingIndicator}>
-              <LoadingSkeleton />
-              <span>AI is thinking...</span>
-            </div>
-          ) : (
-            chatHistory.map((message, index) => (
-              <div
-                key={index}
-                className={`${styles.message} ${
-                  message.role === "user"
-                    ? styles.userMessage
-                    : styles.aiMessage
-                }`}
-              >
-                <div className={styles.messageContent}>
-                  <strong>{message.role === "user" ? "You" : "AI"}: </strong>
-                  {message.message}
+        {!conversationStarted ? (
+          <div className={styles.startContainer}>
+            <h2>Start a conversation in German</h2>
+            <p>Practice your {levelParam} level German with a conversation about {topicParam}</p>
+            <Button onClick={startConversation}>Start Conversation</Button>
+          </div>
+        ) : (
+          <>
+            <div className={styles.chatHistory} ref={chatHistoryRef}>
+              {isLoading ? (
+                <div className={styles.loadingIndicator}>
+                  <LoadingSkeleton />
+                  <span>AI is thinking...</span>
                 </div>
-                {message.role === "assistant" && (
-                  <div className={styles.messageActions}>
-                    <TextToSpeech text={message.message} />
+              ) : (
+                chatHistory.map((message, index) => (
+                  <div
+                    key={index}
+                    className={`${styles.message} ${
+                      message.role === "user"
+                        ? styles.userMessage
+                        : styles.aiMessage
+                    }`}
+                  >
+                    <div className={styles.messageContent}>
+                      <strong>{message.role === "user" ? "You" : "AI"}: </strong>
+                      {message.message}
+                    </div>
+                    {message.role === "assistant" && (
+                      <div className={styles.messageActions}>
+                        <TextToSpeech text={message.message} />
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
-            ))
-          )}
-          {isProcessing && (
-            <div className={styles.loadingIndicator}>
-              <LoadingSkeleton />
-              <span>AI is thinking...</span>
+                ))
+              )}
+              {isProcessing && (
+                <div className={styles.loadingIndicator}>
+                  <LoadingSkeleton />
+                  <span>AI is thinking...</span>
+                </div>
+              )}
             </div>
-          )}
-        </div>
-        <div className={styles.inputSection}>
-          <input
-            type="text"
-            value={userInput}
-            onChange={(e) => setUserInput(e.target.value)}
-            placeholder="Type your message..."
-            className={styles.inputBox}
-            disabled={isLoading || isProcessing}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && !isLoading && !isProcessing && userInput.trim()) {
-                handleButtonClick();
-              }
-            }}
-          />
-          <Button
-            onClick={handleButtonClick}
-            disabled={isLoading || isProcessing || !userInput.trim()}
-          >
-            Send
-          </Button>
-          <AudioRecorder 
-            onTranscriptionResult={handleTranscriptionResult}
-            disabled={isLoading || isProcessing}
-          />
-        </div>
+            <div className={styles.inputSection}>
+              <input
+                type="text"
+                value={userInput}
+                onChange={(e) => setUserInput(e.target.value)}
+                placeholder="Type your message..."
+                className={styles.inputBox}
+                disabled={isLoading || isProcessing}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !isLoading && !isProcessing && userInput.trim()) {
+                    handleButtonClick();
+                  }
+                }}
+              />
+              <Button
+                onClick={handleButtonClick}
+                disabled={isLoading || isProcessing || !userInput.trim()}
+              >
+                Send
+              </Button>
+              <AudioRecorder 
+                onTranscriptionResult={handleTranscriptionResult}
+                disabled={isLoading || isProcessing}
+              />
+            </div>
+          </>
+        )}
       </PageLayout>
     </>
   );

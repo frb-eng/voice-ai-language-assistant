@@ -1,3 +1,1 @@
-- Show spinning wheel until text to speech.
-- Implment autoplay for text to speech.
 - Add toggle for autoplay

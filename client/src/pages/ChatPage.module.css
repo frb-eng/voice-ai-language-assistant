@@ -28,6 +28,34 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
+.startContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  background-color: #1e1e1e;
+  padding: 2rem;
+  border-radius: 12px;
+  max-width: 800px;
+  margin: 2rem auto;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  text-align: center;
+}
+
+.startContainer h2 {
+  color: #00D1B2;
+  margin: 0;
+  font-size: 1.8rem;
+}
+
+.startContainer p {
+  color: #ccc;
+  margin: 0;
+  font-size: 1.1rem;
+  max-width: 80%;
+}
+
 .chatHistory {
   flex-grow: 1;
   min-height: 350px;
@@ -148,5 +176,19 @@
   .inputSection {
     margin: 0.5rem 0.5rem;
     flex-wrap: nowrap;
+  }
+  
+  .startContainer {
+    padding: 1.5rem;
+    margin: 1rem 0.5rem;
+  }
+  
+  .startContainer h2 {
+    font-size: 1.5rem;
+  }
+  
+  .startContainer p {
+    font-size: 1rem;
+    max-width: 95%;
   }
 }
