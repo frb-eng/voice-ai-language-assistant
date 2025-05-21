@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import styles from "./TextToSpeech.module.css";
 
 interface TextToSpeechProps {
@@ -6,6 +6,17 @@ interface TextToSpeechProps {
   voice?: string;
   autoPlay?: boolean;
 }
+
+// Cache interface for storing audio blobs
+interface AudioCache {
+  [key: string]: {
+    blob: Blob;
+    url: string;
+  };
+}
+
+// Create a shared audio cache across component instances
+const audioCache: AudioCache = {};
 
 const TextToSpeech: React.FC<TextToSpeechProps> = ({ 
   text, 
@@ -15,49 +26,90 @@ const TextToSpeech: React.FC<TextToSpeechProps> = ({
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(null);
-  const [previousText, setPreviousText] = useState<string>("");
+  const cacheKeyRef = useRef<string>("");
 
   useEffect(() => {
     // Only auto-play when text changes and autoPlay is enabled
-    if (autoPlay && text && text !== previousText && !isPlaying && !isLoading) {
-      setPreviousText(text);
+    if (autoPlay && text && !isPlaying && !isLoading) {
       handleSpeak();
     }
   }, [text, autoPlay]);
+
+  useEffect(() => {
+    // Clean up when component unmounts
+    return () => {
+      if (audioElement) {
+        audioElement.pause();
+        if (cacheKeyRef.current) {
+          // Don't revoke cached URLs on unmount
+          const isCached = audioCache[cacheKeyRef.current]?.url === audioElement.src;
+          if (!isCached) {
+            URL.revokeObjectURL(audioElement.src);
+          }
+        }
+      }
+    };
+  }, [audioElement]);
+
+  // Generate a cache key based on text content and voice
+  const getCacheKey = (text: string, voice: string): string => {
+    return `${voice}:${text}`;
+  };
 
   const handleSpeak = async () => {
     if (!text || isPlaying || isLoading) return;
 
     try {
       setIsLoading(true);
+      const cacheKey = getCacheKey(text, voice);
+      cacheKeyRef.current = cacheKey;
+      
+      let audioBlob: Blob;
+      let audioUrl: string;
 
-      // Call our API to generate speech from text using OpenAI
-      const response = await fetch('/api/text-to-speech', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ text, voice }),
-      });
+      // Check if we have this text+voice combination cached
+      if (audioCache[cacheKey]) {
+        console.log("Using cached audio for:", cacheKey);
+        audioBlob = audioCache[cacheKey].blob;
+        audioUrl = audioCache[cacheKey].url;
+      } else {
+        // Call our API to generate speech from text using OpenAI
+        const response = await fetch('/api/text-to-speech', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ text, voice }),
+        });
 
-      if (!response.ok) {
-        throw new Error('Failed to generate speech');
+        if (!response.ok) {
+          throw new Error('Failed to generate speech');
+        }
+
+        // Get the audio blob from the response
+        audioBlob = await response.blob();
+        
+        // Create an object URL for the audio blob
+        audioUrl = URL.createObjectURL(audioBlob);
+        
+        // Store in cache
+        audioCache[cacheKey] = {
+          blob: audioBlob,
+          url: audioUrl
+        };
       }
-
-      // Get the audio blob from the response
-      const audioBlob = await response.blob();
-      
-      // Create an object URL for the audio blob
-      const audioUrl = URL.createObjectURL(audioBlob);
-      
-      // Create and set up an audio element
-      const audio = new Audio(audioUrl);
       
       // Clean up previous audio element if it exists
       if (audioElement) {
         audioElement.pause();
-        URL.revokeObjectURL(audioElement.src);
+        // Only revoke URL if not from cache
+        if (!audioCache[cacheKeyRef.current] || audioElement.src !== audioCache[cacheKeyRef.current].url) {
+          URL.revokeObjectURL(audioElement.src);
+        }
       }
+      
+      // Create and set up an audio element
+      const audio = new Audio(audioUrl);
       
       // Store the new audio element
       setAudioElement(audio);
@@ -65,13 +117,19 @@ const TextToSpeech: React.FC<TextToSpeechProps> = ({
       // Set up event listeners
       audio.onended = () => {
         setIsPlaying(false);
-        URL.revokeObjectURL(audioUrl);
+        // Don't revoke cached URLs
       };
       
       audio.onerror = () => {
         setIsPlaying(false);
-        URL.revokeObjectURL(audioUrl);
         console.error('Error playing audio');
+        
+        // If there's an error playing from cache, try to regenerate
+        if (audioCache[cacheKey]) {
+          delete audioCache[cacheKey];
+          // Don't retry here to avoid potential infinite loops, 
+          // but the next play attempt will regenerate
+        }
       };
       
       // Play the audio
