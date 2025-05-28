@@ -153,6 +153,111 @@
   padding: 0.5rem;
 }
 
+.validationSection {
+  margin-top: 0.8rem;
+  padding: 0.8rem;
+  border-radius: 6px;
+  background-color: #182026;
+  border-left: 3px solid;
+}
+
+.validationCorrect {
+  border-color: #00D1B2;
+}
+
+.validationIncorrect {
+  border-color: #FF3860;
+}
+
+.validationHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.validationTitle {
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+.validationCorrect .validationTitle {
+  color: #00D1B2;
+}
+
+.validationIncorrect .validationTitle {
+  color: #FF3860;
+}
+
+.validationFeedback {
+  font-style: italic;
+  margin-bottom: 0.5rem;
+}
+
+.validationExplanation {
+  font-size: 0.9rem;
+  border-top: 1px solid #333;
+  padding-top: 0.5rem;
+  color: #ccc;
+}
+
+.validationToggle {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+  gap: 0.5rem;
+}
+
+.toggleSwitch {
+  position: relative;
+  display: inline-block;
+  width: 48px;
+  height: 24px;
+}
+
+.toggleSwitch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggleSlider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #333;
+  transition: .4s;
+  border-radius: 24px;
+}
+
+.toggleSlider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+input:checked + .toggleSlider {
+  background-color: #00D1B2;
+}
+
+input:checked + .toggleSlider:before {
+  transform: translateX(24px);
+}
+
+.toggleLabel {
+  font-size: 0.9rem;
+  color: #ccc;
+}
+
 @media (max-width: 768px) {
   .chatWindow {
     padding: 1rem;
@@ -190,5 +295,17 @@
   .startContainer p {
     font-size: 1rem;
     max-width: 95%;
+  }
+  
+  .validationSection {
+    padding: 0.6rem;
+  }
+  
+  .validationTitle {
+    font-size: 0.8rem;
+  }
+  
+  .validationExplanation {
+    font-size: 0.8rem;
   }
 }

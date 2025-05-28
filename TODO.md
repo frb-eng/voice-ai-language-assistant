@@ -1,1 +1,2 @@
-- Add toggle for autoplay
+Cleanup feedback: string;
+    explanation: string;

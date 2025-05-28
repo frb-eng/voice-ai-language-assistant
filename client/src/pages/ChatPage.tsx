@@ -11,6 +11,11 @@ import PageLayout from "../components/PageLayout";
 type Message = {
   role: "user" | "assistant";
   message: string;
+  validation?: {
+    is_correct: boolean;
+    feedback: string;
+    explanation: string;
+  };
 };
 
 export const ChatPage = () => {
@@ -91,10 +96,14 @@ export const ChatPage = () => {
           return response.json();
         })
         .then((data) => {
-          // Add AI response to chat history
+          // Add AI response to chat history with validation if present
           setChatHistory((prev) => [
             ...prev,
-            { role: data.role, message: data.message },
+            { 
+              role: data.role, 
+              message: data.message,
+              validation: data.validation // Include validation data if available
+            },
           ]);
         })
         .catch((error) => {
@@ -164,6 +173,27 @@ export const ChatPage = () => {
                       <strong>{message.role === "user" ? "You" : "AI"}: </strong>
                       {message.message}
                     </div>
+                    {message.role === "assistant" && message.validation && (
+                      <div className={`${styles.validationSection} ${
+                        message.validation.is_correct 
+                          ? styles.validationCorrect 
+                          : styles.validationIncorrect
+                      }`}>
+                        <div className={styles.validationHeader}>
+                          <span className={styles.validationTitle}>
+                            {message.validation.is_correct 
+                              ? "✓ I understood you correctly" 
+                              : "✗ I need a bit more clarity"}
+                          </span>
+                        </div>
+                        <div className={styles.validationFeedback}>
+                          {message.validation.feedback}
+                        </div>
+                        <div className={styles.validationExplanation}>
+                          {message.validation.explanation}
+                        </div>
+                      </div>
+                    )}
                     {message.role === "assistant" && (
                       <div className={styles.messageActions}>
                         <TextToSpeech text={message.message} />

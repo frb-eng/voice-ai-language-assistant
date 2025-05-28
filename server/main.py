@@ -23,6 +23,11 @@ class TextToSpeechRequest(BaseModel):
     text: str
     voice: str = "alloy"  # Default voice
 
+class ValidationResponse(BaseModel):
+    is_correct: bool
+    feedback: str
+    explanation: str
+
 client = OpenAI(
     # This is the default and can be omitted
     api_key=os.environ.get("OPEN_API_TOKEN"),
@@ -98,6 +103,62 @@ async def get_conversation(level: str = Query(..., regex="^(A1|A2|B1|B2|C1|C2)$"
 
 @app.post("/api/chat/continue")
 async def continue_conversation(chat_request: ChatRequest):
+    # Always validate if there's at least one user message in history
+    if chat_request.history and any(msg.role == "user" for msg in chat_request.history):
+        # Get the latest user message
+        latest_user_message = next((msg for msg in reversed(chat_request.history) if msg.role == "user"), None)
+        
+        if latest_user_message:
+            # Prepare validation request
+            validation_messages = [
+                {
+                    "role": "system",
+                    "content": f"""
+                    You are a German language teacher evaluating a student's response.
+                    The student is at {chat_request.level} level and the conversation topic is '{chat_request.topic}'.
+                    
+                    Evaluate the student's response for:
+                    1. Language correctness (grammar, vocabulary, sentence structure)
+                    2. Topic relevance (stays on topic)
+                    3. Appropriate language level ({chat_request.level})
+                    
+                    Return a JSON object with:
+                    - is_correct: boolean (true if the answer is generally correct, false otherwise)
+                    - feedback: string (brief feedback in English using first-person language, as if you are speaking directly to the student)
+                    - explanation: string (detailed explanation in English about what was correct/incorrect and why, using first-person language)
+                    
+                    Examples of first-person feedback:
+                    - "I understand what you mean, but I would say..."
+                    - "You did that well! I like how you..."
+                    """
+                },
+                {
+                    "role": "user",
+                    "content": f"Student response: {latest_user_message.message}\nPlease evaluate this response."
+                }
+            ]
+            
+            # Get validation from AI
+            validation_response = client.beta.chat.completions.parse(
+                messages=validation_messages,
+                model="gpt-4o",
+                response_format=ValidationResponse
+            )
+            
+            validation_result = validation_response.choices[0].message.parsed
+            
+            # If the response is incorrect, return feedback instead of continuing conversation
+            if not validation_result.is_correct:
+                                return {
+                                    "message": validation_result.explanation,
+                    "role": "assistant",
+                    "validation": {
+                        "is_correct": False,
+                        # "feedback": validation_result.feedback,
+                        # "explanation": validation_result.explanation
+                    }
+                }
+    
     # Convert the chat history to the format expected by OpenAI API
     messages = [
         {
@@ -124,7 +185,16 @@ async def continue_conversation(chat_request: ChatRequest):
         temperature=0.7,
     )
     
-    return {"message": response.choices[0].message.content, "role": "assistant"}
+    # Always return validation data for correct responses
+    return {
+        "message": response.choices[0].message.content,
+        "role": "assistant",
+        "validation": {
+            "is_correct": True,
+            "feedback": "Very good! Your German sounds natural.",
+            "explanation": "Your response was correct and appropriate for the topic and language level."
+        }
+    }
 
 @app.post("/api/speech-to-text")
 async def speech_input(audio: UploadFile = File(...)):
