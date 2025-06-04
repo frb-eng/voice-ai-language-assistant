@@ -13,8 +13,6 @@ type Message = {
   message: string;
   validation?: {
     is_correct: boolean;
-    feedback: string;
-    explanation: string;
   };
 };
 
@@ -160,47 +158,48 @@ export const ChatPage = () => {
                   <span>AI is thinking...</span>
                 </div>
               ) : (
-                chatHistory.map((message, index) => (
-                  <div
-                    key={index}
-                    className={`${styles.message} ${
-                      message.role === "user"
-                        ? styles.userMessage
-                        : styles.aiMessage
-                    }`}
-                  >
-                    <div className={styles.messageContent}>
-                      <strong>{message.role === "user" ? "You" : "AI"}: </strong>
-                      {message.message}
+                chatHistory.map((message, index) => {
+                  // Show validation as a single red bubble (no nested bubbles) if incorrect
+                  const isValidationError = message.role === "assistant" && message.validation && !message.validation.is_correct;
+                  if (isValidationError && message.validation) {
+                    return (
+                      <div
+                        key={index}
+                        className={`${styles.message} ${styles.aiMessage} ${styles.validationIncorrect}`}
+                        style={{ borderLeft: '3px solid #FF3860', background: '#2a0d13' }}
+                      >
+                        <div className={styles.messageContent}>
+                          <strong>AI: </strong>
+                          {message.message}
+                        </div>
+                        <div className={styles.messageActions}>
+                          <TextToSpeech text={message.message} />
+                        </div>
+                      </div>
+                    );
+                  }
+                  // Default bubble rendering
+                  return (
+                    <div
+                      key={index}
+                      className={`${styles.message} ${
+                        message.role === "user"
+                          ? styles.userMessage
+                          : styles.aiMessage
+                      }`}
+                    >
+                      <div className={styles.messageContent}>
+                        <strong>{message.role === "user" ? "You" : "AI"}: </strong>
+                        {message.message}
+                      </div>
+                      {message.role === "assistant" && (
+                        <div className={styles.messageActions}>
+                          <TextToSpeech text={message.message} />
+                        </div>
+                      )}
                     </div>
-                    {message.role === "assistant" && message.validation && (
-                      <div className={`${styles.validationSection} ${
-                        message.validation.is_correct 
-                          ? styles.validationCorrect 
-                          : styles.validationIncorrect
-                      }`}>
-                        <div className={styles.validationHeader}>
-                          <span className={styles.validationTitle}>
-                            {message.validation.is_correct 
-                              ? "✓ I understood you correctly" 
-                              : "✗ I need a bit more clarity"}
-                          </span>
-                        </div>
-                        <div className={styles.validationFeedback}>
-                          {message.validation.feedback}
-                        </div>
-                        <div className={styles.validationExplanation}>
-                          {message.validation.explanation}
-                        </div>
-                      </div>
-                    )}
-                    {message.role === "assistant" && (
-                      <div className={styles.messageActions}>
-                        <TextToSpeech text={message.message} />
-                      </div>
-                    )}
-                  </div>
-                ))
+                  );
+                })
               )}
               {isProcessing && (
                 <div className={styles.loadingIndicator}>

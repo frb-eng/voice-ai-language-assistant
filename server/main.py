@@ -120,16 +120,14 @@ async def continue_conversation(chat_request: ChatRequest):
                     Evaluate the student's response for:
                     1. Language correctness (grammar, vocabulary, sentence structure)
                     2. Topic relevance (stays on topic)
-                    3. Appropriate language level ({chat_request.level})
                     
                     Return a JSON object with:
                     - is_correct: boolean (true if the answer is generally correct, false otherwise)
-                    - feedback: string (brief feedback in English using first-person language, as if you are speaking directly to the student)
-                    - explanation: string (detailed explanation in English about what was correct/incorrect and why, using first-person language)
+                    - feedback: string (concise and brief feedback in German using first-person language, as if you are speaking directly to the student)
                     
                     Examples of first-person feedback:
-                    - "I understand what you mean, but I would say..."
-                    - "You did that well! I like how you..."
+                    - "Ich verstehe was du meinst, aber ich würde sagen..."
+                    - "Das hast du gut gemacht! Ich mag wie du..."
                     """
                 },
                 {
@@ -142,7 +140,8 @@ async def continue_conversation(chat_request: ChatRequest):
             validation_response = client.beta.chat.completions.parse(
                 messages=validation_messages,
                 model="gpt-4o",
-                response_format=ValidationResponse
+                response_format=ValidationResponse,
+                temperature=1.3,
             )
             
             validation_result = validation_response.choices[0].message.parsed
@@ -150,12 +149,10 @@ async def continue_conversation(chat_request: ChatRequest):
             # If the response is incorrect, return feedback instead of continuing conversation
             if not validation_result.is_correct:
                                 return {
-                                    "message": validation_result.explanation,
+                                    "message": validation_result.feedback,
                     "role": "assistant",
                     "validation": {
                         "is_correct": False,
-                        # "feedback": validation_result.feedback,
-                        # "explanation": validation_result.explanation
                     }
                 }
     
