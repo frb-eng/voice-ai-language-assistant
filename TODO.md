@@ -1,8 +1,7 @@
-- suggets and ask for learning goal and add it to the propmt
-- Improve German accent in voice
-- Make the feedback shorter in german
-- Make it possible to expand the feedback fro more details (in English)
 - Introduce validation categoris with icons
-- We cannot follow now a conversation
+- Make the feedback shorter in german
 - Use level appropriate feedback.
+- We cannot follow now a conversation
+- Make it possible to expand the feedback fro more details (in English)
 - Update the temperatures
+- Improve German accent in voice
