@@ -5,3 +5,4 @@
 - Introduce validation categoris with icons
 - We cannot follow now a conversation
 - Use level appropriate feedback.
+- Update the temperatures

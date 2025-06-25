@@ -1,9 +1,8 @@
-import { Link } from "react-router-dom";
 import { languageLevels } from "../AppContext";
 import { Header } from "../components/Header";
 import PageLayout from "../components/PageLayout";
 import List from "../components/List";
-import styles from "./LanguageLevelPage.module.css";
+import Link from "../components/Link";
 
 export const LanguageLevelPage = () => {
   return (
@@ -16,7 +15,6 @@ export const LanguageLevelPage = () => {
             <Link
               key={languageLevel.id}
               to={`/level/${languageLevel.id}/topic`}
-              className={styles.levelLink}
             >
               {languageLevel.name}
             </Link>

@@ -1,0 +1,96 @@
+/* Modern Link Component Styles */
+
+.link {
+  display: block;
+  padding: 18px 32px;
+  border-radius: 12px;
+  text-decoration: none;
+  font-size: 1.1rem;
+  font-weight: 500;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  border: 1px solid transparent;
+  
+  /* Mobile first - responsive padding */
+  @media (max-width: 768px) {
+    padding: 16px 24px;
+    font-size: 1rem;
+  }
+}
+
+/* Primary variant - modern gradient background */
+.primary {
+  background: linear-gradient(135deg, #00D1B2 0%, #00a896 100%);
+  color: #ffffff;
+}
+
+.primary:hover {
+  background: linear-gradient(135deg, #00a896 0%, #008f7a 100%);
+  transform: translateY(-2px);
+}
+
+.primary:active {
+  transform: translateY(0);
+}
+
+/* Secondary variant - outlined style */
+.secondary {
+  background: transparent;
+  color: #e5e7eb;
+  border: 2px solid #374151;
+}
+
+.secondary:hover {
+  background: #374151;
+  border-color: #4b5563;
+  transform: translateY(-1px);
+}
+
+.secondary:active {
+  transform: translateY(0);
+}
+
+/* Focus states for accessibility */
+.link:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px #00D1B2, 0 0 0 4px rgba(0, 209, 178, 0.2);
+}
+
+/* Ripple effect on click */
+.link::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.link:active::before {
+  width: 300px;
+  height: 300px;
+}
+
+/* Loading state placeholder for skeleton compatibility */
+.skeleton {
+  background: linear-gradient(90deg, #374151 25%, #4b5563 50%, #374151 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+  color: transparent;
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}

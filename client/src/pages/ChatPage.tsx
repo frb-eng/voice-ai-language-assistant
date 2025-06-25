@@ -17,10 +17,11 @@ type Message = {
 };
 
 export const ChatPage = () => {
-  // Get level and topic from URL parameters
-  const { level: levelParam, topic: topicParam } = useParams<{
+  // Get level, topic, and goal from URL parameters
+  const { level: levelParam, topic: topicParam, goal: goalParam } = useParams<{
     level: string;
     topic: string;
+    goal: string;
   }>();
   const [isLoading, setIsLoading] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -38,11 +39,11 @@ export const ChatPage = () => {
 
   // Initialize chat with an AI prompt when conversation is started
   useEffect(() => {
-    if (levelParam && topicParam && conversationStarted && chatHistory.length === 0) {
+    if (levelParam && topicParam && goalParam && conversationStarted && chatHistory.length === 0) {
       setIsLoading(true);
       // Fetch initial prompt from API using URL parameters
       fetch(
-        `/api/chat?level=${levelParam}&topic=${encodeURIComponent(topicParam)}`
+        `/api/chat?level=${levelParam}&topic=${encodeURIComponent(topicParam)}&goal=${encodeURIComponent(goalParam)}`
       )
         .then((response) => response.text())
         .then((data) => {
@@ -52,15 +53,15 @@ export const ChatPage = () => {
         .catch((error) => {
           console.error("Error fetching initial prompt:", error);
           setChatHistory([
-            { role: "assistant", message: `Hello! Let's talk about ${topicParam}` },
+            { role: "assistant", message: `Hello! Let's talk about ${topicParam} focusing on ${goalParam}` },
           ]);
           setIsLoading(false);
         });
     }
-  }, [levelParam, topicParam, conversationStarted, chatHistory.length]);
+  }, [levelParam, topicParam, goalParam, conversationStarted, chatHistory.length]);
 
   const handleSendMessage = (message: string = userInput.trim()) => {
-    if (message && levelParam && topicParam) {
+    if (message && levelParam && topicParam && goalParam) {
       // Add user message to chat history
       setChatHistory((prev) => [
         ...prev,
@@ -84,6 +85,7 @@ export const ChatPage = () => {
         body: JSON.stringify({
           level: levelParam,
           topic: topicParam,
+          goal: goalParam,
           history: updatedHistory,
         }),
       })
@@ -146,7 +148,7 @@ export const ChatPage = () => {
         {!conversationStarted ? (
           <div className={styles.startContainer}>
             <h2>Start a conversation in German</h2>
-            <p>Practice your {levelParam} level German with a conversation about {topicParam}</p>
+            <p>Practice your {levelParam} level German with a conversation about {topicParam}, focusing on {goalParam}</p>
             <Button onClick={startConversation}>Start Conversation</Button>
           </div>
         ) : (

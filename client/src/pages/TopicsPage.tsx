@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useAppContext } from "../AppContext";
 import { Header } from "../components/Header";
 import PageLayout from "../components/PageLayout";
 import List from "../components/List";
+import Link from "../components/Link";
 import { LoadingSkeleton } from "../components/LoadingSkeleton";
-import styles from "./TopicsPage.module.css";
 
 export const TopicsPage = () => {
   // Get level from URL parameters
@@ -36,8 +36,7 @@ export const TopicsPage = () => {
             : topics.map((topic, index) => (
                 <Link
                   key={index}
-                  to={`/level/${level}/topic/${encodeURIComponent(topic)}`}
-                  className={styles.topicLink}
+                  to={`/level/${level}/topic/${encodeURIComponent(topic)}/goal`}
                 >
                   {topic}
                 </Link>

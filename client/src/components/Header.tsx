@@ -2,7 +2,7 @@ import { Link, useParams } from "react-router-dom";
 import styles from "./Header.module.css";
 
 export const Header = () => {
-  const { level, topic } = useParams<{ level?: string; topic?: string }>();
+  const { level, topic, goal } = useParams<{ level?: string; topic?: string; goal?: string }>();
 
   return (
     <header className={styles.header}>
@@ -38,6 +38,14 @@ export const Header = () => {
             className={styles.tag}
           >
             {topic}
+          </Link>
+        )}
+        {goal && topic && level && (
+          <Link 
+            to={`/level/${level}/topic/${encodeURIComponent(topic)}/goal`}
+            className={styles.tag}
+          >
+            {goal}
           </Link>
         )}
       </div>

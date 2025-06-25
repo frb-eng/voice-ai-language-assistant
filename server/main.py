@@ -14,6 +14,9 @@ load_dotenv()
 class Topics(BaseModel):
     topics: list[str]
 
+class LearningGoals(BaseModel):
+    goals: list[str]
+
 class ChatMessage(BaseModel):
     message: str
     role: str
@@ -21,6 +24,7 @@ class ChatMessage(BaseModel):
 class ChatRequest(BaseModel):
     level: str
     topic: str
+    goal: str = ""
     history: list[ChatMessage] = []
 
 class TextToSpeechRequest(BaseModel):
@@ -81,29 +85,64 @@ async def get_topics(level: str = Query(..., regex="^(A1|A2|B1|B2|C1|C2)$")):
     topics = response.choices[0].message.parsed
     return topics
 
+@app.get("/api/learning-goals")
+async def get_learning_goals(level: str = Query(..., regex="^(A1|A2|B1|B2|C1|C2)$"), topic: str = Query(...)):
+    response = client.beta.chat.completions.parse(
+    messages=[
+        {
+          "role": "system",
+        "content": """
+        You are a German teacher and helpful assistant.
+        You will receive a language level and topic.
+        Please reply with 5 specific learning goals in English for the provided level and topic for a German language learner.
+        These should be concrete, actionable objectives that the student can work towards during their conversation practice.
+        Example response for A1 level and "Food" topic:
+        [
+            "Learn basic food vocabulary (10-15 words)",
+            "Practice expressing food preferences",
+            "Learn to order food in a restaurant",
+            "Describe what you ate yesterday",
+            "Practice asking about ingredients"
+        ]
+        """  
+        },
+        {
+            "role": "user",
+            "content": f"Generate learning goals for {level} level German learner studying {topic}"
+        }
+    ],
+    model="gpt-4o",
+    temperature=0.8,
+    response_format=LearningGoals
+    )
+    goals = response.choices[0].message.parsed
+    return goals
+
 @app.get("/api/chat")
-async def get_conversation(level: str = Query(..., regex="^(A1|A2|B1|B2|C1|C2)$"),topic: str = Query(...)):
+async def get_conversation(level: str = Query(..., regex="^(A1|A2|B1|B2|C1|C2)$"), topic: str = Query(...), goal: str = Query(...)):
     response = client.chat.completions.create(
     messages=[
         {
           "role": "system",
         "content": f"""
         You are a German teacher and helpful assistant.
-        You will receive the selected topic and user language level
-        Please reply with a conversation starting single question.
+        You will receive the selected topic, user language level, and learning goal.
+        Please reply with a conversation starting single question in German.
         The topic today is "{topic}".
+        The learning goal is "{goal}".
         The user is a {level} level German language learner.
-        You task is to initiate a conversation with the user.
+        Your task is to initiate a conversation with the user that helps them achieve their learning goal.
+        Respond only in German and keep it appropriate for {level} level.
         Example response:
-        "What is your favorite food and why do you like it?"
+        "Was ist dein Lieblingsessen und warum magst du es?"
         """  
         }
     ],
     model="gpt-4o",
     temperature=1.3,
     )
-    topics = response.choices[0].message.content
-    return topics
+    initial_message = response.choices[0].message.content
+    return initial_message
 
 @app.post("/api/chat/continue")
 async def continue_conversation(chat_request: ChatRequest):
@@ -120,10 +159,12 @@ async def continue_conversation(chat_request: ChatRequest):
                     "content": f"""
                     You are a German language teacher evaluating a student's response.
                     The student is at {chat_request.level} level and the conversation topic is '{chat_request.topic}'.
+                    The learning goal is '{chat_request.goal}'.
                     
                     Evaluate the student's response for:
                     1. Language correctness (grammar, vocabulary, sentence structure)
                     2. Topic relevance (stays on topic)
+                    3. Progress towards the learning goal
                     
                     Return a JSON object with:
                     - is_correct: boolean (true if the answer is generally correct, false otherwise)
@@ -167,10 +208,12 @@ async def continue_conversation(chat_request: ChatRequest):
             "content": f"""
             You are a German teacher and helpful assistant.
             The topic today is "{chat_request.topic}".
+            The learning goal is "{chat_request.goal}".
             The user is a {chat_request.level} level German language learner.
-            Your task is to continue the conversation based on the user's last message.
-            Respond in a way that's appropriate for their level.
+            Your task is to continue the conversation based on the user's last message while helping them achieve their learning goal.
+            Respond in German in a way that's appropriate for their level.
             Keep responses concise, clear, and encouraging.
+            Guide the conversation to help the student practice towards their learning goal.
             """
         }
     ]
