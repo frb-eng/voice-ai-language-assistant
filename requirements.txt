@@ -1,7 +1,8 @@
 fastapi == 0.115.0
 pydantic == 2.9.2
 uvicorn == 0.31.0
-python-dotenv == 1.0.1
+python-dotenv == 1.1.0
 python-multipart == 0.0.19
 openai == 1.84.0
-httpx== 0.28.1
+httpx == 0.28.1
+langsmith == 0.4.1

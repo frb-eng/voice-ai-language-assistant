@@ -1,11 +1,15 @@
 from fastapi import FastAPI, Query, File, UploadFile, Response
 from openai import OpenAI
+from langsmith.wrappers import wrap_openai
+from langsmith import traceable
 import os
 from io import BytesIO
 from tempfile import NamedTemporaryFile
 from fastapi.middleware.cors import CORSMiddleware
-
+from dotenv import load_dotenv
 from pydantic import BaseModel
+
+load_dotenv()
 
 class Topics(BaseModel):
     topics: list[str]
@@ -28,10 +32,10 @@ class ValidationResponse(BaseModel):
     feedback: str
     explanation: str
 
-client = OpenAI(
+client = wrap_openai(OpenAI(
     # This is the default and can be omitted
-    api_key=os.environ.get("OPEN_API_TOKEN"),
-)
+    api_key=os.environ.get("OPENAI_API_KEY"),
+))
 
 app = FastAPI()
 
@@ -79,20 +83,20 @@ async def get_topics(level: str = Query(..., regex="^(A1|A2|B1|B2|C1|C2)$")):
 
 @app.get("/api/chat")
 async def get_conversation(level: str = Query(..., regex="^(A1|A2|B1|B2|C1|C2)$"),topic: str = Query(...)):
-    prompt = f"Initiate a conversation for {topic} for a {level} german language learner."
     response = client.chat.completions.create(
     messages=[
         {
           "role": "system",
-        "content": """
+        "content": f"""
         You are a German teacher and helpful assistant.
         You will receive the selected topic and user language level
         Please reply with a conversation starting single question.
+        The topic today is "{topic}".
+        The user is a {level} level German language learner.
+        You task is to initiate a conversation with the user.
+        Example response:
+        "What is your favorite food and why do you like it?"
         """  
-        },
-        {
-            "role": "user",
-            "content": prompt
         }
     ],
     model="gpt-4o",
@@ -162,8 +166,10 @@ async def continue_conversation(chat_request: ChatRequest):
             "role": "system",
             "content": f"""
             You are a German teacher and helpful assistant.
-            You are having a conversation with a {chat_request.level} level German language learner about '{chat_request.topic}'.
-            Respond in a way that's appropriate for their level. Include some German phrases or words.
+            The topic today is "{chat_request.topic}".
+            The user is a {chat_request.level} level German language learner.
+            Your task is to continue the conversation based on the user's last message.
+            Respond in a way that's appropriate for their level.
             Keep responses concise, clear, and encouraging.
             """
         }
@@ -179,7 +185,7 @@ async def continue_conversation(chat_request: ChatRequest):
     response = client.chat.completions.create(
         messages=messages,
         model="gpt-4o",
-        temperature=0.7,
+        temperature=1.3,
     )
     
     # Always return validation data for correct responses

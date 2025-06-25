@@ -1,6 +1,4 @@
-Cleanup feedback: string;
-    explanation: string;
-
+- suggets and ask for learning goal and add it to the propmt
 - Improve German accent in voice
 - Make the feedback shorter in german
 - Make it possible to expand the feedback fro more details (in English)
