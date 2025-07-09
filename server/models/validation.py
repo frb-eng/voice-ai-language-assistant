@@ -1,7 +1,28 @@
 from pydantic import BaseModel
+from enum import Enum
+from typing import List
+
+
+class ValidationCategory(Enum):
+    WORD_ORDER = "word_order"
+    VOCABULARY = "vocabulary"
+    ARTICLES = "articles"
+    PREPOSITIONS = "prepositions"
+    VERB_CONJUGATION = "verb_conjugation"
+    CONTEXT = "context"
+    GOAL_ACHIEVEMENT = "goal_achievement"
+    LANGUAGE_LEVEL = "language_level"
+    LANGUAGE_STYLE = "language_style"
+
+
+class CategoryValidation(BaseModel):
+    category: ValidationCategory
+    score: int  # 0-5 score
+    feedback: str
+    icon: str  # FontAwesome icon name
 
 
 class ValidationResponse(BaseModel):
     is_correct: bool
-    feedback: str
-    explanation: str
+    overall_feedback: str
+    categories: List[CategoryValidation]
