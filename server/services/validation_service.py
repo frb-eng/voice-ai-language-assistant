@@ -14,9 +14,7 @@ class ValidationService(BaseOpenAIService):
             ValidationCategory.PREPOSITIONS: "fa-map-signs",
             ValidationCategory.VERB_CONJUGATION: "fa-sync",
             ValidationCategory.CONTEXT: "fa-comments",
-            ValidationCategory.GOAL_ACHIEVEMENT: "fa-bullseye",
             ValidationCategory.LANGUAGE_LEVEL: "fa-layer-group",
-            ValidationCategory.LANGUAGE_STYLE: "fa-feather",
         }
 
     async def validate_category(self, message: str, category: ValidationCategory, context: dict) -> CategoryValidation:
@@ -28,9 +26,7 @@ class ValidationService(BaseOpenAIService):
             ValidationCategory.PREPOSITIONS: "Evaluate preposition usage. Are correct prepositions used with proper cases? Rate from 0-5 and provide brief feedback.",
             ValidationCategory.VERB_CONJUGATION: "Evaluate verb conjugation. Check tense, person, and number. Rate from 0-5 and provide brief feedback.",
             ValidationCategory.CONTEXT: "Evaluate contextual appropriateness. Is the response relevant? Rate from 0-5 and provide brief feedback.",
-            ValidationCategory.GOAL_ACHIEVEMENT: f"Given the learning goal '{context.get('learning_goal', 'N/A')}', evaluate achievement. Rate from 0-5 and provide brief feedback.",
             ValidationCategory.LANGUAGE_LEVEL: f"For language level {context.get('language_level', 'A1')}, evaluate appropriateness. Rate from 0-5 and provide brief feedback.",
-            ValidationCategory.LANGUAGE_STYLE: "Evaluate language style and register. Is it appropriate for the context? Rate from 0-5 and provide brief feedback.",
         }
 
         # Add conversation history context if available
@@ -70,11 +66,26 @@ class ValidationService(BaseOpenAIService):
         )
 
     async def validate_message(self, message: str, context: dict) -> ValidationResponse:
-        # Create validation tasks for all categories
-        validation_tasks = [
-            self.validate_category(message, category, context)
-            for category in ValidationCategory
-        ]
+        # Create category-specific contexts
+        validation_tasks = []
+        
+        for category in ValidationCategory:
+            # Define which context elements each category needs
+            category_context = {}
+            
+            # Basic language level info is needed for LANGUAGE_LEVEL and some others
+            if category in [ValidationCategory.LANGUAGE_LEVEL, ValidationCategory.VOCABULARY, 
+                           ValidationCategory.VERB_CONJUGATION]:
+                if "language_level" in context:
+                    category_context["language_level"] = context.get("language_level")
+            
+            # Conversation history is only needed for CONTEXT validation
+            if category == ValidationCategory.CONTEXT:
+                if "conversation_history" in context:
+                    category_context["conversation_history"] = context.get("conversation_history")
+            
+            # Add task with tailored context
+            validation_tasks.append(self.validate_category(message, category, category_context))
         
         # Run all validations in parallel
         validations = await asyncio.gather(*validation_tasks)

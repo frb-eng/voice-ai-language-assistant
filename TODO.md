@@ -21,3 +21,4 @@
 - Update the temperatures
 - Improve German accent in voice
 - Add retry in case of AI failure
+- Fix case when microphone is prressed but the input is used.

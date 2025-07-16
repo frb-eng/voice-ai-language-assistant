@@ -10,9 +10,7 @@ class ValidationCategory(Enum):
     PREPOSITIONS = "prepositions"
     VERB_CONJUGATION = "verb_conjugation"
     CONTEXT = "context"
-    GOAL_ACHIEVEMENT = "goal_achievement"
     LANGUAGE_LEVEL = "language_level"
-    LANGUAGE_STYLE = "language_style"
 
 
 class CategoryValidation(BaseModel):
