@@ -21,8 +21,9 @@ class ConversationService(BaseOpenAIService):
                     The user is a {level} level German language learner.
                     Your task is to initiate a conversation with the user that helps them achieve their learning goal.
                     Respond only in German and keep it appropriate for {level} level.
+                    IMPORTANT: Ask your question in a way that encourages the user to respond with complete sentences, not just one word answers. Include phrases like "Bitte erkläre..." or "Erzähl mir..." to encourage detailed responses.
                     Example response:
-                    "Was ist dein Lieblingsessen und warum magst du es?"
+                    "Was ist dein Lieblingsessen und warum magst du es? Bitte erkläre mir deine Antwort in ganzen Sätzen."
                     """  
                 }
             ],
@@ -84,6 +85,7 @@ class ConversationService(BaseOpenAIService):
                 Respond in German in a way that's appropriate for their level.
                 Keep responses concise, clear, and encouraging.
                 Guide the conversation to help the student practice towards their learning goal.
+                IMPORTANT: When asking follow-up questions, encourage the user to respond with complete sentences rather than one-word answers. Use phrases like "Kannst du mir mehr darüber erzählen?", "Bitte erkläre deine Antwort", or "Was denkst du darüber und warum?" to promote detailed responses.
                 """
             }
         ]

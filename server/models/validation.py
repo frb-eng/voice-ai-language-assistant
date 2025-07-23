@@ -15,7 +15,7 @@ class ValidationCategory(Enum):
 
 class CategoryValidation(BaseModel):
     category: ValidationCategory
-    score: int  # 0-5 score
+    score: int | None
     feedback: str
     icon: str  # FontAwesome icon name
 

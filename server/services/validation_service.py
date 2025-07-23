@@ -1,3 +1,4 @@
+import json
 from typing import List
 import asyncio
 from models.validation import ValidationCategory, CategoryValidation, ValidationResponse
@@ -20,13 +21,13 @@ class ValidationService(BaseOpenAIService):
     async def validate_category(self, message: str, category: ValidationCategory, context: dict) -> CategoryValidation:
         # Prepare a specific prompt for each category
         prompts = {
-            ValidationCategory.WORD_ORDER: "Evaluate the German word order. Consider main and subordinate clauses, verb position. Rate from 0-5 and provide brief feedback.",
-            ValidationCategory.VOCABULARY: "Evaluate word choice and vocabulary usage. Are appropriate German words used? Rate from 0-5 and provide brief feedback.",
-            ValidationCategory.ARTICLES: "Evaluate article usage (der, die, das). Check gender and case. Rate from 0-5 and provide brief feedback.",
-            ValidationCategory.PREPOSITIONS: "Evaluate preposition usage. Are correct prepositions used with proper cases? Rate from 0-5 and provide brief feedback.",
-            ValidationCategory.VERB_CONJUGATION: "Evaluate verb conjugation. Check tense, person, and number. Rate from 0-5 and provide brief feedback.",
-            ValidationCategory.CONTEXT: "Evaluate contextual appropriateness. Is the response relevant? Rate from 0-5 and provide brief feedback.",
-            ValidationCategory.LANGUAGE_LEVEL: f"For language level {context.get('language_level', 'A1')}, evaluate appropriateness. Rate from 0-5 and provide brief feedback.",
+            ValidationCategory.WORD_ORDER: "ONLY evaluate the German word order. Consider main and subordinate clauses, verb position. Do NOT evaluate vocabulary, articles, prepositions, verb conjugation or context.",
+            ValidationCategory.VOCABULARY: "ONLY evaluate word choice and vocabulary usage. Are appropriate German words used? Do NOT evaluate word order, articles, prepositions, verb conjugation or context.",
+            ValidationCategory.ARTICLES: "ONLY evaluate article usage (der, die, das). Check gender and case. Do NOT evaluate word order, vocabulary, prepositions, verb conjugation or context.",
+            ValidationCategory.PREPOSITIONS: "ONLY evaluate preposition usage. Are correct prepositions used with proper cases? Do NOT evaluate word order, vocabulary, articles, verb conjugation or context.",
+            ValidationCategory.VERB_CONJUGATION: "ONLY evaluate verb conjugation. Check tense, person, and number. Do NOT evaluate word order, vocabulary, articles, prepositions or context.",
+            ValidationCategory.CONTEXT: "ONLY evaluate contextual appropriateness. Is the response relevant? Do NOT evaluate word order, vocabulary, articles, prepositions or verb conjugation.",
+            ValidationCategory.LANGUAGE_LEVEL: f"ONLY for language level {context.get('language_level', 'A1')}, evaluate appropriateness. Is the language complexity appropriate for this level? Do NOT evaluate word order, vocabulary, articles, prepositions, verb conjugation or context separately.",
         }
 
         # Add conversation history context if available
@@ -38,32 +39,38 @@ class ValidationService(BaseOpenAIService):
                 for msg in history
             ) + "\n\n"
 
-        prompt = f"{prompts[category]}\n\n{conversation_context}Message to evaluate:\n{message}\n\nProvide response in format: 'Score: X\nFeedback: brief feedback'"
+        prompt = f"""
+        {prompts[category]}
         
-        response = self.client.chat.completions.create(
+        {conversation_context}Message to evaluate:
+        {message}
+        
+        IMPORTANT: If elements for evaluation are missing (e.g., no articles to evaluate), DO NOT include a score in your response and provide feedback about what's missing.
+        """
+        
+        response = self.client.beta.chat.completions.parse(
             model="gpt-4o",
             messages=[
-                {"role": "system", "content": "You are a German language expert. Evaluate strictly and provide concise feedback."},
+                {"role": "system", "content": "You are a German language expert. Evaluate strictly and provide concise feedback. Return your evaluation as a valid JSON object."},
                 {"role": "user", "content": prompt}
             ],
             temperature=0.7,
-            max_tokens=100
+            response_format=CategoryValidation
         )
 
-        # Parse the response
-        content = response.choices[0].message.content
-        score_line = content.split('\n')[0]
-        feedback_line = content.split('\n')[1] if len(content.split('\n')) > 1 else "No feedback provided"
+        # Parse the JSON response
+        result = json.loads(response.choices[0].message.content)
         
-        score = int(score_line.split(':')[1].strip()) if 'Score:' in score_line else 0
-        feedback = feedback_line.split(':')[1].strip() if 'Feedback:' in feedback_line else feedback_line
-
+        # Check if score is present in the response
+        score = result.get("score") if "score" in result else None
+        
         return CategoryValidation(
             category=category,
             score=score,
-            feedback=feedback,
+            feedback=result.get("feedback", "No feedback provided"),
             icon=self.category_icons[category]
         )
+
 
     async def validate_message(self, message: str, context: dict) -> ValidationResponse:
         # Create category-specific contexts
@@ -90,12 +97,26 @@ class ValidationService(BaseOpenAIService):
         # Run all validations in parallel
         validations = await asyncio.gather(*validation_tasks)
 
-        # Calculate if the response is correct (average score > 3)
-        average_score = sum(v.score for v in validations) / len(validations)
-        is_correct = average_score > 3
+        # Separate context validation from other categories
+        context_validation = next((v for v in validations if v.category == ValidationCategory.CONTEXT), None)
+        other_validations = [v for v in validations if v.category != ValidationCategory.CONTEXT]
+        
+        # Calculate average scores separately, handling null scores
+        context_score = context_validation.score if context_validation and context_validation.score is not None else 0
+        
+        # Only include validations with non-null scores in the average calculation
+        valid_scores = [v.score for v in other_validations if v.score is not None]
+        language_average_score = sum(valid_scores) / len(valid_scores) if valid_scores else 0
+        
+        # Consider both scores when determining if response is correct
+        # If no valid scores are available, default to checking only context
+        if valid_scores:
+            is_correct = language_average_score > 3 and context_score >= 4
+        else:
+            is_correct = context_score >= 4
 
         # Generate overall feedback
-        weak_categories = [v.category.value for v in validations if v.score <= 2]
+        weak_categories = [v.category.value for v in validations if v.score is not None and v.score <= 2]
         if weak_categories:
             overall_feedback = f"Areas needing improvement: {', '.join(weak_categories)}"
         else:
