@@ -23,9 +23,14 @@ interface ValidationIconProps {
 
 const getScoreClass = (score?: number | null): string => {
   if (score === null || score === undefined) return styles.scoreUnavailable;
-  if (score >= 4) return styles.scoreGood;
-  if (score >= 3) return styles.scoreAverage;
-  return styles.scorePoor;
+  switch (score) {
+    case 1: return styles.score1;
+    case 2: return styles.score2;
+    case 3: return styles.score3;
+    case 4: return styles.score4;
+    case 5: return styles.score5;
+    default: return styles.scoreUnavailable;
+  }
 };
 
 const getCategoryDisplayName = (category: ValidationCategory): string => {
@@ -43,8 +48,8 @@ export const ValidationIcon: React.FC<ValidationIconProps> = ({
   const displayName = getCategoryDisplayName(category);
   
   const tooltipText = feedback 
-    ? `${displayName}: ${score !== null && score !== undefined ? `${score}/5` : 'Not evaluated'}\n${feedback}`
-    : `${displayName}: ${score !== null && score !== undefined ? `${score}/5` : 'Not evaluated'}`;
+    ? `${displayName} (${score}/5)\n${feedback}`
+    : `${displayName} (${score}/5)`;
   
   return (
     <div 
@@ -52,11 +57,6 @@ export const ValidationIcon: React.FC<ValidationIconProps> = ({
       title={tooltipText}
     >
       {icon}
-      {score !== null && score !== undefined && (
-        <div className={styles.scoreDisplay}>
-          {score}
-        </div>
-      )}
     </div>
   );
 };

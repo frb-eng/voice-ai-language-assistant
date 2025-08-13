@@ -21,10 +21,17 @@ export const ValidationCategories: React.FC<ValidationCategoriesProps> = ({
     return null;
   }
 
+  // Filter out categories without scores
+  const validCategories = categories.filter(validation => validation.score);
+
+  if (validCategories.length === 0) {
+    return null;
+  }
+
   return (
     <div className={styles.validationContainer}>
       <div className={styles.validationTitle}>{title}</div>
-      {categories.map((validation) => (
+      {validCategories.map((validation) => (
         <ValidationIcon
           key={validation.category}
           category={validation.category}

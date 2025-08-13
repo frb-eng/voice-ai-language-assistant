@@ -191,7 +191,7 @@ export const ChatPage = () => {
                           <TextToSpeech text={message.message} />
                         </div>
                       )}
-                      {message.role === "user" && message.validation && (
+                      {message.role === "assistant" && message.validation && (
                         <ValidationCategories 
                           categories={message.validation.categories}
                           title="Language Assessment"
