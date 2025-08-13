@@ -1,18 +1,4 @@
-- Introduce validation categoris with icons
-    - word order
-    - correct words have been used
-    - correct articles
-    - prepositions
-    - conjugations verbs 
-    - following the context
-    - is the goal the fullfilled
-    - is the conversiotion on right language level
-    - Right language is used
-
-- Structured JSOn response from validator propts
-- Return undefied in articel validator if no article in the sentence.
 - Show icons and tooltips for validatos
-
 - Pass the context only to necessary validators. Some needs only the level. Some only the histiry.
 - Improve the evaluation logic. Add weight to each validator. Context following is hight in weight.
 

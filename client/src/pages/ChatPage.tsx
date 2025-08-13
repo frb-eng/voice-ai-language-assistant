@@ -7,13 +7,25 @@ import TextToSpeech from "../components/TextToSpeech";
 import { Header } from "../components/Header";
 import { LoadingSkeleton } from "../components/LoadingSkeleton";
 import PageLayout from "../components/PageLayout";
+import { ValidationCategories } from "../components/ValidationCategories";
+import { ValidationCategory } from "../components/ValidationIcon";
+
+interface CategoryValidation {
+  category: ValidationCategory;
+  score: number | null;
+  feedback: string;
+}
+
+interface ValidationResponse {
+  is_correct: boolean;
+  overall_feedback: string;
+  categories: CategoryValidation[];
+}
 
 type Message = {
   role: "user" | "assistant";
   message: string;
-  validation?: {
-    is_correct: boolean;
-  };
+  validation?: ValidationResponse;
 };
 
 export const ChatPage = () => {
@@ -161,26 +173,6 @@ export const ChatPage = () => {
                 </div>
               ) : (
                 chatHistory.map((message, index) => {
-                  // Show validation as a single red bubble (no nested bubbles) if incorrect
-                  const isValidationError = message.role === "assistant" && message.validation && !message.validation.is_correct;
-                  if (isValidationError && message.validation) {
-                    return (
-                      <div
-                        key={index}
-                        className={`${styles.message} ${styles.aiMessage} ${styles.validationIncorrect}`}
-                        style={{ borderLeft: '3px solid #FF3860', background: '#2a0d13' }}
-                      >
-                        <div className={styles.messageContent}>
-                          <strong>AI: </strong>
-                          {message.message}
-                        </div>
-                        <div className={styles.messageActions}>
-                          <TextToSpeech text={message.message} />
-                        </div>
-                      </div>
-                    );
-                  }
-                  // Default bubble rendering
                   return (
                     <div
                       key={index}
@@ -198,6 +190,12 @@ export const ChatPage = () => {
                         <div className={styles.messageActions}>
                           <TextToSpeech text={message.message} />
                         </div>
+                      )}
+                      {message.role === "user" && message.validation && (
+                        <ValidationCategories 
+                          categories={message.validation.categories}
+                          title="Language Assessment"
+                        />
                       )}
                     </div>
                   );

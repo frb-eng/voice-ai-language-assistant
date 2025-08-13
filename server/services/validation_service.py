@@ -8,24 +8,18 @@ from .base_openai_service import BaseOpenAIService
 class ValidationService(BaseOpenAIService):
     def __init__(self):
         super().__init__()
-        self.category_icons = {
-            ValidationCategory.WORD_ORDER: "fa-arrows-alt-h",
-            ValidationCategory.VOCABULARY: "fa-book",
-            ValidationCategory.ARTICLES: "fa-font",
-            ValidationCategory.PREPOSITIONS: "fa-map-signs",
-            ValidationCategory.VERB_CONJUGATION: "fa-sync",
-            ValidationCategory.CONTEXT: "fa-comments",
-            ValidationCategory.LANGUAGE_LEVEL: "fa-layer-group",
-        }
 
     async def validate_category(self, message: str, category: ValidationCategory, context: dict) -> CategoryValidation:
+        # Common instruction for categories that might have missing elements
+        missing_elements_instruction = "IMPORTANT: If elements for evaluation are missing (e.g., no articles to evaluate), DO NOT include a score in your response and provide feedback about what's missing."
+        
         # Prepare a specific prompt for each category
         prompts = {
             ValidationCategory.WORD_ORDER: "ONLY evaluate the German word order. Consider main and subordinate clauses, verb position. Do NOT evaluate vocabulary, articles, prepositions, verb conjugation or context.",
-            ValidationCategory.VOCABULARY: "ONLY evaluate word choice and vocabulary usage. Are appropriate German words used? Do NOT evaluate word order, articles, prepositions, verb conjugation or context.",
-            ValidationCategory.ARTICLES: "ONLY evaluate article usage (der, die, das). Check gender and case. Do NOT evaluate word order, vocabulary, prepositions, verb conjugation or context.",
-            ValidationCategory.PREPOSITIONS: "ONLY evaluate preposition usage. Are correct prepositions used with proper cases? Do NOT evaluate word order, vocabulary, articles, verb conjugation or context.",
-            ValidationCategory.VERB_CONJUGATION: "ONLY evaluate verb conjugation. Check tense, person, and number. Do NOT evaluate word order, vocabulary, articles, prepositions or context.",
+            ValidationCategory.VOCABULARY: "ONLY evaluate word choice and vocabulary usage. Are appropriate German words used? If the language is not German, return a score of 1. Do NOT evaluate word order, articles, prepositions, verb conjugation or context.",
+            ValidationCategory.ARTICLES: f"ONLY evaluate article usage (der, die, das). Check gender and case. Do NOT evaluate word order, vocabulary, prepositions, verb conjugation or context. {missing_elements_instruction}",
+            ValidationCategory.PREPOSITIONS: f"ONLY evaluate preposition usage. Are correct prepositions used with proper cases? Do NOT evaluate word order, vocabulary, articles, verb conjugation or context. {missing_elements_instruction}",
+            ValidationCategory.VERB_CONJUGATION: f"ONLY evaluate verb conjugation. Check tense, person, and number. Do NOT evaluate word order, vocabulary, articles, prepositions or context. {missing_elements_instruction}",
             ValidationCategory.CONTEXT: "ONLY evaluate contextual appropriateness. Is the response relevant? Do NOT evaluate word order, vocabulary, articles, prepositions or verb conjugation.",
             ValidationCategory.LANGUAGE_LEVEL: f"ONLY for language level {context.get('language_level', 'A1')}, evaluate appropriateness. Is the language complexity appropriate for this level? Do NOT evaluate word order, vocabulary, articles, prepositions, verb conjugation or context separately.",
         }
@@ -44,14 +38,12 @@ class ValidationService(BaseOpenAIService):
         
         {conversation_context}Message to evaluate:
         {message}
-        
-        IMPORTANT: If elements for evaluation are missing (e.g., no articles to evaluate), DO NOT include a score in your response and provide feedback about what's missing.
         """
         
         response = self.client.beta.chat.completions.parse(
             model="gpt-4o",
             messages=[
-                {"role": "system", "content": "You are a German language expert. Evaluate strictly and provide concise feedback. Return your evaluation as a valid JSON object."},
+                {"role": "system", "content": "You are a German language expert. Evaluate strictly and provide concise feedback. IMPORTANT: Score must be between 1-5 or null/None only. Return your evaluation as a valid JSON object."},
                 {"role": "user", "content": prompt}
             ],
             temperature=0.7,
@@ -67,8 +59,7 @@ class ValidationService(BaseOpenAIService):
         return CategoryValidation(
             category=category,
             score=score,
-            feedback=result.get("feedback", "No feedback provided"),
-            icon=self.category_icons[category]
+            feedback=result.get("feedback", "No feedback provided")
         )
 
 

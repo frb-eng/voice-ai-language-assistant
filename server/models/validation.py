@@ -17,7 +17,6 @@ class CategoryValidation(BaseModel):
     category: ValidationCategory
     score: int | None
     feedback: str
-    icon: str  # FontAwesome icon name
 
 
 class ValidationResponse(BaseModel):
