@@ -108,15 +108,37 @@ export const ChatPage = () => {
           return response.json();
         })
         .then((data) => {
-          // Add AI response to chat history with validation if present
-          setChatHistory((prev) => [
-            ...prev,
-            { 
-              role: data.role, 
-              message: data.message,
-              validation: data.validation // Include validation data if available
-            },
-          ]);
+          // If validation is present, associate it with the last user message
+          if (data.validation) {
+            setChatHistory((prev) => {
+              const updatedHistory = [...prev];
+              // Find the last user message and add validation to it
+              for (let i = updatedHistory.length - 1; i >= 0; i--) {
+                if (updatedHistory[i].role === 'user') {
+                  updatedHistory[i] = {
+                    ...updatedHistory[i],
+                    validation: data.validation
+                  };
+                  break;
+                }
+              }
+              // Add AI response without validation
+              updatedHistory.push({ 
+                role: data.role, 
+                message: data.message
+              });
+              return updatedHistory;
+            });
+          } else {
+            // Add AI response without validation data
+            setChatHistory((prev) => [
+              ...prev,
+              { 
+                role: data.role, 
+                message: data.message
+              },
+            ]);
+          }
         })
         .catch((error) => {
           console.error('Error continuing conversation:', error);
@@ -191,10 +213,9 @@ export const ChatPage = () => {
                           <TextToSpeech text={message.message} />
                         </div>
                       )}
-                      {message.role === "assistant" && message.validation && (
+                      {message.role === "user" && message.validation && (
                         <ValidationCategories 
                           categories={message.validation.categories}
-                          title="Language Assessment"
                         />
                       )}
                     </div>

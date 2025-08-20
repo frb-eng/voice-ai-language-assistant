@@ -2,80 +2,105 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 4px 8px;
-  height: 24px;
-  border-radius: 12px;
-  font-size: 12px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  font-size: 14px;
   margin: 0 4px;
   cursor: help;
   transition: all 0.2s ease;
   position: relative;
+  background-color: #2a2a2a;
+  border: 3px solid #444;
+}
+
+.validationIcon::before {
+  content: '';
+  position: absolute;
+  top: -3px;
+  left: -3px;
+  right: -3px;
+  bottom: -3px;
+  border-radius: 50%;
+  padding: 3px;
+  background: #444;
+  mask: radial-gradient(farthest-side, transparent calc(100% - 3px), white calc(100% - 3px));
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), white calc(100% - 3px));
 }
 
 .validationIcon:hover {
   transform: scale(1.05);
 }
 
+.score1::before {
+  background: conic-gradient(from 0deg, #e74c3c 0deg 72deg, #444 72deg 360deg);
+}
+
 .score1 {
-  border-color: #e74c3c;
-  background-color: rgba(231, 76, 60, 0.15);
-  color: #e74c3c;
+  color: #ffffff;
+}
+
+.score2::before {
+  background: conic-gradient(from 0deg, #e67e22 0deg 144deg, #444 144deg 360deg);
 }
 
 .score2 {
-  border-color: #e67e22;
-  background-color: rgba(230, 126, 34, 0.15);
-  color: #e67e22;
+  color: #ffffff;
+}
+
+.score3::before {
+  background: conic-gradient(from 0deg, #f39c12 0deg 216deg, #444 216deg 360deg);
 }
 
 .score3 {
-  border-color: #f39c12;
-  background-color: rgba(243, 156, 18, 0.15);
-  color: #f39c12;
+  color: #ffffff;
+}
+
+.score4::before {
+  background: conic-gradient(from 0deg, #27ae60 0deg 288deg, #444 288deg 360deg);
 }
 
 .score4 {
-  border-color: #27ae60;
-  background-color: rgba(39, 174, 96, 0.15);
-  color: #27ae60;
+  color: #ffffff;
+}
+
+.score5::before {
+  background: conic-gradient(from 0deg, #2ecc71 0deg 360deg, #444 360deg 360deg);
 }
 
 .score5 {
-  border-color: #2ecc71;
-  background-color: rgba(46, 204, 113, 0.15);
-  color: #2ecc71;
+  color: #ffffff;
 }
 
 .scoreUnavailable {
   border-color: #666;
-  background-color: rgba(102, 102, 102, 0.1);
+  color: #999;
   opacity: 0.6;
 }
 
 
 .validationContainer {
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+  gap: 4px;
+  justify-content: flex-end;
   margin-top: 8px;
-  padding: 12px;
-  background-color: #1e1e1e;
-  border-radius: 8px;
-  border: 1px solid #333;
-}
-
-.validationTitle {
-  width: 100%;
-  font-size: 0.9rem;
-  font-weight: bold;
-  color: #ccc;
-  margin-bottom: 8px;
 }
 
 @media (max-width: 768px) {
   .validationIcon {
-    padding: 3px 6px;
-    height: 20px;
-    font-size: 11px;
+    width: 28px;
+    height: 28px;
+    font-size: 12px;
+    border-width: 2px;
+  }
+  
+  .validationIcon::before {
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    padding: 2px;
+    mask: radial-gradient(farthest-side, transparent calc(100% - 2px), white calc(100% - 2px));
+    -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 2px), white calc(100% - 2px));
   }
 }

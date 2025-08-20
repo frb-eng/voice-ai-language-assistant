@@ -10,12 +10,10 @@ interface CategoryValidation {
 
 interface ValidationCategoriesProps {
   categories: CategoryValidation[];
-  title?: string;
 }
 
 export const ValidationCategories: React.FC<ValidationCategoriesProps> = ({ 
-  categories, 
-  title = "Language Assessment" 
+  categories
 }) => {
   if (!categories || categories.length === 0) {
     return null;
@@ -30,7 +28,6 @@ export const ValidationCategories: React.FC<ValidationCategoriesProps> = ({
 
   return (
     <div className={styles.validationContainer}>
-      <div className={styles.validationTitle}>{title}</div>
       {validCategories.map((validation) => (
         <ValidationIcon
           key={validation.category}
